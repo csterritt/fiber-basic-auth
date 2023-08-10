@@ -1,0 +1,22 @@
+{{include "partials/header"}}
+
+{{ if Error != nil && Error != "" }}
+<p>There was a problem: {{ Error }}</p>
+{{ end }}
+
+<p>
+    <a href="/protected">The protected page</a> that you can't visit unless you sign in.
+    You'll be redirected to the sign in page if you visit that page, and you're not already
+    signed in.
+</p>
+
+{{ if IsSignedIn == "true" }}
+<p>
+    <form method="POST" action="/auth/sign-out">
+        <button>Sign out</button>
+    </form>
+</p>
+{{ else }}
+<p><a href="/auth/sign-in">Sign in</a></p>
+<p><a href="/auth/sign-up">Sign up</a></p>
+{{ end}}

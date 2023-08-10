@@ -1,0 +1,21 @@
+<p><a href="/">Back to the main page.</a></p>
+
+<h4>Enter your magic code here for email address {{ Email }}.</h4>
+
+{{ if Error != nil && Error != "" }}
+<p>There was a problem: {{ Error }}</p>
+{{ end }}
+
+<p>
+    <form method="POST" action="/auth/submit-code">
+        <input type="text" placeholder="code" name="code"/>
+
+        <button>Submit</button>
+    </form>
+</p>
+
+<p>
+    <form method="POST" action="/auth/cancel-sign-in">
+        <button>Cancel sign in/up</button>
+    </form>
+</p>

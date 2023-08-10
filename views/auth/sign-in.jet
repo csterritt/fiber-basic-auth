@@ -1,0 +1,17 @@
+<p><a href="/">Back to the main page.</a></p>
+
+<h4>Sign In Page</h4>
+
+{{ if Error != nil && Error != "" }}
+<p>There was a problem: {{ Error }}</p>
+{{ end }}
+
+<p>
+    <form method="POST" action="/auth/submit-sign-in">
+        <input type="text" placeholder="email" name="email"/>
+
+        <button>Submit</button>
+    </form>
+</p>
+
+<p><a href="/auth/sign-up">Sign up instead</a></p>

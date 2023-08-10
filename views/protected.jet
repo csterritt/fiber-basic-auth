@@ -1,0 +1,11 @@
+{{include "partials/header"}}
+
+<p><a href="/">Back to the main page.</a></p>
+
+<p>
+    <form method="POST" action="/auth/sign-out">
+        <button>Sign out</button>
+    </form>
+</p>
+
+<h4><i>The protected page!</i></h4>
