@@ -29,7 +29,8 @@ don't log that value, obviously!).
 #### Production use
 
 First of all, you'll have to figure out some way to get the magic code to your
-users! There's nothing here (yet) to support that.
+users! There's nothing here (yet) to support that. All the text mentions emails;
+if you want to use something else, like text messages, change that too.
 
 Second, the codes don't expire in twenty minutes or so. Gotta fix that.
 
@@ -50,3 +51,5 @@ to be durable... let them do their job.
 
 Sixth, the code should remember what protected path you tried to visit, and once you
 sign in, take you there instead of to the root.
+
+Seventh, do basic input validation, e.g., on emails.

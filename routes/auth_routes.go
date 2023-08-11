@@ -64,7 +64,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 		return c.Render(constants.AuthSignInPath, fiber.Map{
 			"Title": "Protected",
 			"Error": errVal,
-		}, constants.AuthLayoutsMainPath)
+		}, constants.LayoutsMainPath)
 	})
 
 	app.Post(constants.AuthSubmitSignInPath, func(c *fiber.Ctx) error {
@@ -104,7 +104,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 		return c.Render(constants.AuthSignUpPath, fiber.Map{
 			"Title": "Protected",
 			"Error": errVal,
-		}, constants.AuthLayoutsMainPath)
+		}, constants.LayoutsMainPath)
 	})
 
 	app.Post(constants.AuthSubmitSignUpPath, func(c *fiber.Ctx) error {
@@ -145,7 +145,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 			"Title": "Enter Code",
 			"Email": email,
 			"Error": errVal,
-		}, constants.AuthLayoutsMainPath)
+		}, constants.LayoutsMainPath)
 	})
 
 	app.Post(constants.AuthSubmitCodePath, func(c *fiber.Ctx) error {

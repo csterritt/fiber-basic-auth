@@ -1,6 +1,5 @@
 package constants
 
-const AuthLayoutsMainPath = "/auth/layouts/main"
 const AuthSignInPath = "/auth/sign-in"
 const AuthSignUpPath = "/auth/sign-up"
 const AuthSignOutPath = "/auth/sign-out"
@@ -12,5 +11,4 @@ const AuthCancelPath = "/auth/cancel-sign-in"
 
 const IndexPath = "/"
 const LayoutsMainPath = "/layouts/main"
-const PartialsHeaderPath = "/partials/header"
 const ProtectedPath = "/protected"
