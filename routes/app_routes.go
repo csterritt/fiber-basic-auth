@@ -3,6 +3,7 @@ package routes
 import (
 	"log"
 
+	"fiber-basic-auth/constants"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/gofiber/storage/sqlite3"
@@ -17,7 +18,7 @@ func SetUpAppRoutes(app *fiber.App) {
 		})
 	}
 
-	app.Get("/", func(c *fiber.Ctx) error {
+	app.Get(constants.IndexPath, func(c *fiber.Ctx) error {
 		// Get session from storage
 		sess, err := store.Get(c)
 		if err != nil {
@@ -36,10 +37,10 @@ func SetUpAppRoutes(app *fiber.App) {
 			"Name":       name,
 			"IsSignedIn": isSignedIn,
 			"Error":      errVal,
-		}, "layouts/main")
+		}, constants.LayoutsMainPath)
 	})
 
-	app.Get("/protected", func(c *fiber.Ctx) error {
+	app.Get(constants.ProtectedPath, func(c *fiber.Ctx) error {
 		// Get session from storage
 		sess, err := store.Get(c)
 		if err != nil {
@@ -47,17 +48,17 @@ func SetUpAppRoutes(app *fiber.App) {
 		}
 
 		isSignedIn := sess.Get("is-signed-in")
-		log.Printf("/protected route found isSignedIn '%v'\n", isSignedIn)
+		log.Printf("protected route found isSignedIn '%v'\n", isSignedIn)
 		if isSignedIn == nil || isSignedIn != "true" {
 			sess.Set("error", "You must be signed in to visit that page.")
 			_ = sess.Save()
 
-			return c.Redirect("/auth/sign-in", fiber.StatusSeeOther)
+			return c.Redirect(constants.AuthSignInPath, fiber.StatusSeeOther)
 		} else {
 			// Render index within layouts/main
-			return c.Render("protected", fiber.Map{
+			return c.Render(constants.ProtectedPath, fiber.Map{
 				"Title": "Protected",
-			}, "layouts/main")
+			}, constants.LayoutsMainPath)
 		}
 	})
 }

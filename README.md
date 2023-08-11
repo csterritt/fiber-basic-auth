@@ -47,3 +47,6 @@ Fifth, using the "sqlite3.Storage" engine is probably not a great idea, particul
 if you're running on a serverless-style hosting environment where your sqlite3 database
 could suddenly disappear, since the service started a new host. Databases are supposed
 to be durable... let them do their job.
+
+Sixth, the code should remember what protected path you tried to visit, and once you
+sign in, take you there instead of to the root.

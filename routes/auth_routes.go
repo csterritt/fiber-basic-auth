@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"time"
 
+	"fiber-basic-auth/constants"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/gofiber/storage/sqlite3"
@@ -49,11 +50,9 @@ func getSignInUpCode() string {
 }
 
 func SetUpAuthRoutes(app *fiber.App) {
-	// set up local sqlite3 storage for session information
 	setupStorage()
 
-	app.Get("/auth/sign-in", func(c *fiber.Ctx) error {
-		// Get session from storage
+	app.Get(constants.AuthSignInPath, func(c *fiber.Ctx) error {
 		sess, err := store.Get(c)
 		if err != nil {
 			return err
@@ -62,13 +61,13 @@ func SetUpAuthRoutes(app *fiber.App) {
 		errVal := getErrorIfAny(sess)
 
 		// Render index within layouts/main
-		return c.Render("auth/sign-in", fiber.Map{
+		return c.Render(constants.AuthSignInPath, fiber.Map{
 			"Title": "Protected",
 			"Error": errVal,
-		}, "layouts/main")
+		}, constants.AuthLayoutsMainPath)
 	})
 
-	app.Post("/auth/submit-sign-in", func(c *fiber.Ctx) error {
+	app.Post(constants.AuthSubmitSignInPath, func(c *fiber.Ctx) error {
 		// Get session from storage
 		sess, err := store.Get(c)
 		if err != nil {
@@ -80,7 +79,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 			sess.Set("error", "You must provide an email.")
 			_ = sess.Save()
 
-			return c.Redirect("/auth/sign-in", fiber.StatusSeeOther)
+			return c.Redirect(constants.AuthSignInPath, fiber.StatusSeeOther)
 		} else {
 			sess.Set("email", email)
 			codeVal := getSignInUpCode()
@@ -88,11 +87,11 @@ func SetUpAuthRoutes(app *fiber.App) {
 			sess.Set("expected-code", codeVal)
 			_ = sess.Save()
 
-			return c.Redirect("/auth/enter-code", fiber.StatusSeeOther)
+			return c.Redirect(constants.AuthEnterCodePath, fiber.StatusSeeOther)
 		}
 	})
 
-	app.Get("/auth/sign-up", func(c *fiber.Ctx) error {
+	app.Get(constants.AuthSignUpPath, func(c *fiber.Ctx) error {
 		// Get session from storage
 		sess, err := store.Get(c)
 		if err != nil {
@@ -102,13 +101,13 @@ func SetUpAuthRoutes(app *fiber.App) {
 		errVal := getErrorIfAny(sess)
 
 		// Render index within layouts/main
-		return c.Render("auth/sign-up", fiber.Map{
+		return c.Render(constants.AuthSignUpPath, fiber.Map{
 			"Title": "Protected",
 			"Error": errVal,
-		}, "layouts/main")
+		}, constants.AuthLayoutsMainPath)
 	})
 
-	app.Post("/auth/submit-sign-up", func(c *fiber.Ctx) error {
+	app.Post(constants.AuthSubmitSignUpPath, func(c *fiber.Ctx) error {
 		// Get session from storage
 		sess, err := store.Get(c)
 		if err != nil {
@@ -120,7 +119,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 			sess.Set("error", "You must provide an email.")
 			_ = sess.Save()
 
-			return c.Redirect("/auth/sign-up", fiber.StatusSeeOther)
+			return c.Redirect(constants.AuthSignUpPath, fiber.StatusSeeOther)
 		} else {
 			sess.Set("email", email)
 			codeVal := getSignInUpCode()
@@ -128,11 +127,11 @@ func SetUpAuthRoutes(app *fiber.App) {
 			sess.Set("expected-code", codeVal)
 			_ = sess.Save()
 
-			return c.Redirect("/auth/enter-code", fiber.StatusSeeOther)
+			return c.Redirect(constants.AuthEnterCodePath, fiber.StatusSeeOther)
 		}
 	})
 
-	app.Get("/auth/enter-code", func(c *fiber.Ctx) error {
+	app.Get(constants.AuthEnterCodePath, func(c *fiber.Ctx) error {
 		// Get session from storage
 		sess, err := store.Get(c)
 		if err != nil {
@@ -142,14 +141,14 @@ func SetUpAuthRoutes(app *fiber.App) {
 		email := sess.Get("email")
 		errVal := getErrorIfAny(sess)
 		// Render index within layouts/main
-		return c.Render("auth/enter-code", fiber.Map{
+		return c.Render(constants.AuthEnterCodePath, fiber.Map{
 			"Title": "Enter Code",
 			"Email": email,
 			"Error": errVal,
-		}, "layouts/main")
+		}, constants.AuthLayoutsMainPath)
 	})
 
-	app.Post("/auth/submit-code", func(c *fiber.Ctx) error {
+	app.Post(constants.AuthSubmitCodePath, func(c *fiber.Ctx) error {
 		// Get session from storage
 		sess, err := store.Get(c)
 		if err != nil {
@@ -161,7 +160,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 			sess.Set("error", "You must provide an email address.")
 			_ = sess.Save()
 
-			return c.Redirect("/auth/sign-in", fiber.StatusSeeOther)
+			return c.Redirect(constants.AuthSignInPath, fiber.StatusSeeOther)
 		}
 
 		code := c.FormValue("code")
@@ -170,22 +169,22 @@ func SetUpAuthRoutes(app *fiber.App) {
 			sess.Set("error", "You must provide the code.") // PRODUCTION: Might want to indicate where it is
 			_ = sess.Save()
 
-			return c.Redirect("/auth/enter-code", fiber.StatusSeeOther)
+			return c.Redirect(constants.AuthEnterCodePath, fiber.StatusSeeOther)
 		} else if code != expectedCode {
 			sess.Set("error", "That code is incorrect or expired.")
 			_ = sess.Save()
 
-			return c.Redirect("/auth/enter-code", fiber.StatusSeeOther)
+			return c.Redirect(constants.AuthEnterCodePath, fiber.StatusSeeOther)
 		} else {
 			sess.Set("code", "")
 			sess.Set("is-signed-in", "true")
 			_ = sess.Save()
 
-			return c.Redirect("/", fiber.StatusSeeOther)
+			return c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
 		}
 	})
 
-	app.Post("/auth/cancel-sign-in", func(c *fiber.Ctx) error {
+	app.Post(constants.AuthCancelPath, func(c *fiber.Ctx) error {
 		// Get session from storage
 		sess, err := store.Get(c)
 		if err != nil {
@@ -196,10 +195,10 @@ func SetUpAuthRoutes(app *fiber.App) {
 		sess.Set("code", "")
 		_ = sess.Save()
 
-		return c.Redirect("/", fiber.StatusSeeOther)
+		return c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
 	})
 
-	app.Post("/auth/sign-out", func(c *fiber.Ctx) error {
+	app.Post(constants.AuthSignOutPath, func(c *fiber.Ctx) error {
 		// Get session from storage
 		sess, err := store.Get(c)
 		if err != nil {
@@ -211,6 +210,6 @@ func SetUpAuthRoutes(app *fiber.App) {
 		sess.Set("is-signed-in", "")
 		_ = sess.Save()
 
-		return c.Redirect("/", fiber.StatusSeeOther)
+		return c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
 	})
 }
