@@ -42,7 +42,7 @@ would work (eventually).
 
 Fourth, search the source for the phrase "PRODUCTION:". You'll find a number of places
 where it's *extremely highly recommended* that you take some particular action. Do what
-the code says.
+it says.
 
 Fifth, using the "sqlite3.Storage" engine is probably not a great idea, particularly
 if you're running on a serverless-style hosting environment where your sqlite3 database
@@ -52,4 +52,5 @@ to be durable... let them do their job.
 Sixth, the code should remember what protected path you tried to visit, and once you
 sign in, take you there instead of to the root.
 
-Seventh, do basic input validation, e.g., on emails.
+Seventh, do basic input validation, e.g., on email addresses. Maybe figure out how to
+do HTML validation (it is 2023, after all).
