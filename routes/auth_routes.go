@@ -3,6 +3,7 @@ package routes
 import (
 	"log"
 	"math/rand"
+	"regexp"
 	"time"
 
 	"fiber-basic-auth/constants"
@@ -15,6 +16,16 @@ var digits = [10]string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
 
 var storage *sqlite3.Storage // PRODUCTION: You probably want to use something else, especially on a serverless host
 var store *session.Store
+var emailPattern *regexp.Regexp
+
+func init() {
+	emailPattern = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+}
+
+// validate that the given string looks like an email address
+func isValidEmail(email string) bool {
+	return emailPattern.MatchString(email)
+}
 
 func setupStorage() {
 	if storage == nil {
@@ -75,12 +86,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 		}
 
 		email := c.FormValue("email")
-		if email == "" {
-			sess.Set("error", "You must provide an email.")
-			_ = sess.Save()
-
-			return c.Redirect(constants.AuthSignInPath, fiber.StatusSeeOther)
-		} else {
+		if isValidEmail(email) {
 			sess.Set("email", email)
 			codeVal := getSignInUpCode()
 			log.Printf("codeVal is %s\n", codeVal) // PRODUCTION: GET RID OF THIS LINE!!!
@@ -88,6 +94,11 @@ func SetUpAuthRoutes(app *fiber.App) {
 			_ = sess.Save()
 
 			return c.Redirect(constants.AuthEnterCodePath, fiber.StatusSeeOther)
+		} else {
+			sess.Set("error", "You must provide an email.")
+			_ = sess.Save()
+
+			return c.Redirect(constants.AuthSignInPath, fiber.StatusSeeOther)
 		}
 	})
 
@@ -115,12 +126,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 		}
 
 		email := c.FormValue("email")
-		if email == "" {
-			sess.Set("error", "You must provide an email.")
-			_ = sess.Save()
-
-			return c.Redirect(constants.AuthSignUpPath, fiber.StatusSeeOther)
-		} else {
+		if isValidEmail(email) {
 			sess.Set("email", email)
 			codeVal := getSignInUpCode()
 			log.Printf("codeVal is %s\n", codeVal) // PRODUCTION: GET RID OF THIS LINE!!!
@@ -128,6 +134,11 @@ func SetUpAuthRoutes(app *fiber.App) {
 			_ = sess.Save()
 
 			return c.Redirect(constants.AuthEnterCodePath, fiber.StatusSeeOther)
+		} else {
+			sess.Set("error", "You must provide an email.")
+			_ = sess.Save()
+
+			return c.Redirect(constants.AuthSignUpPath, fiber.StatusSeeOther)
 		}
 	})
 
