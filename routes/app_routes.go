@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"log"
-
 	"fiber-basic-auth/constants"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -48,9 +46,9 @@ func SetUpAppRoutes(app *fiber.App) {
 		}
 
 		isSignedIn := sess.Get("is-signed-in")
-		log.Printf("protected route found isSignedIn '%v'\n", isSignedIn)
 		if isSignedIn == nil || isSignedIn != "true" {
 			sess.Set("error", "You must be signed in to visit that page.")
+			sess.Set("url-to-return-to", c.Path())
 			_ = sess.Save()
 
 			return c.Redirect(constants.AuthSignInPath, fiber.StatusSeeOther)

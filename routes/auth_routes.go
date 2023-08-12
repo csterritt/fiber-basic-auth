@@ -176,11 +176,16 @@ func SetUpAuthRoutes(app *fiber.App) {
 
 			return c.Redirect(constants.AuthEnterCodePath, fiber.StatusSeeOther)
 		} else {
+			pathToGoTo := sess.Get("url-to-return-to")
+			if pathToGoTo == nil || pathToGoTo == "" {
+				pathToGoTo = constants.IndexPath
+			}
 			sess.Set("code", "")
 			sess.Set("is-signed-in", "true")
+			sess.Set("url-to-return-to", "")
 			_ = sess.Save()
 
-			return c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
+			return c.Redirect(pathToGoTo.(string), fiber.StatusSeeOther)
 		}
 	})
 
@@ -193,6 +198,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 
 		sess.Set("email", "")
 		sess.Set("code", "")
+		sess.Set("url-to-return-to", "")
 		_ = sess.Save()
 
 		return c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
@@ -208,6 +214,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 		sess.Set("email", "")
 		sess.Set("code", "")
 		sess.Set("is-signed-in", "")
+		sess.Set("url-to-return-to", "")
 		_ = sess.Save()
 
 		return c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
