@@ -56,4 +56,5 @@ if you're running on a serverless-style hosting environment where your sqlite3 d
 could suddenly disappear, since the service started a new host. Databases are supposed
 to be durable... let them do their job.
 
-Sixth, sign-up should direct our new user to a welcome page with some basic info.
+Sixth, sign-up should direct our new user to a welcome page with some basic info. Or
+maybe it's just a pop-up/toast/other notification.
