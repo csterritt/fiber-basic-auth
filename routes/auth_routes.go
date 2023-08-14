@@ -60,6 +60,17 @@ func getSignInUpCode() string {
 	return result
 }
 
+func redirectIfSignedIn(c *fiber.Ctx, sess *session.Session) bool {
+	isSignedIn := sess.Get("is-signed-in")
+	if isSignedIn == "true" {
+		_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
+
+		return true
+	}
+
+	return false
+}
+
 func SetUpAuthRoutes(app *fiber.App) {
 	setupStorage()
 
@@ -69,10 +80,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 			return err
 		}
 
-		isSignedIn := sess.Get("is-signed-in")
-		if isSignedIn == "true" {
-			_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
-
+		if redirectIfSignedIn(c, sess) {
 			return nil
 		}
 
@@ -92,10 +100,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 			return err
 		}
 
-		isSignedIn := sess.Get("is-signed-in")
-		if isSignedIn == "true" {
-			_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
-
+		if redirectIfSignedIn(c, sess) {
 			return nil
 		}
 
@@ -123,10 +128,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 			return err
 		}
 
-		isSignedIn := sess.Get("is-signed-in")
-		if isSignedIn == "true" {
-			_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
-
+		if redirectIfSignedIn(c, sess) {
 			return nil
 		}
 
@@ -146,10 +148,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 			return err
 		}
 
-		isSignedIn := sess.Get("is-signed-in")
-		if isSignedIn == "true" {
-			_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
-
+		if redirectIfSignedIn(c, sess) {
 			return nil
 		}
 
@@ -177,10 +176,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 			return err
 		}
 
-		isSignedIn := sess.Get("is-signed-in")
-		if isSignedIn == "true" {
-			_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
-
+		if redirectIfSignedIn(c, sess) {
 			return nil
 		}
 
@@ -201,10 +197,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 			return err
 		}
 
-		isSignedIn := sess.Get("is-signed-in")
-		if isSignedIn == "true" {
-			_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
-
+		if redirectIfSignedIn(c, sess) {
 			return nil
 		}
 
@@ -249,10 +242,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 			return err
 		}
 
-		isSignedIn := sess.Get("is-signed-in")
-		if isSignedIn == "true" {
-			_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
-
+		if redirectIfSignedIn(c, sess) {
 			return nil
 		}
 
