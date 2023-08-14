@@ -9,6 +9,7 @@ import (
 
 	"fiber-basic-auth/routes"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -55,6 +56,13 @@ func main() {
 	}))
 
 	app.Use(helmet.New())
+
+	app.Use(cors.New())
+	app.Use(cors.New(cors.Config{
+		//AllowOrigins: "https://the-final-website.com, https://the-final-website.net", // PRODUCTION: Comment in, set this to your site(s)
+		AllowOrigins: "http://localhost:3000", // PRODUCTION: REMOVE THIS LINE or comment it out
+		AllowHeaders: "Origin, Content-Type, Accept",
+	}))
 
 	routes.SetUpAuthRoutes(app)
 	routes.SetUpAppRoutes(app)
