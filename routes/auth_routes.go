@@ -69,6 +69,13 @@ func SetUpAuthRoutes(app *fiber.App) {
 			return err
 		}
 
+		isSignedIn := sess.Get("is-signed-in")
+		if isSignedIn == "true" {
+			_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
+
+			return nil
+		}
+
 		errVal := getErrorIfAny(sess)
 
 		// Render index within layouts/main
@@ -83,6 +90,13 @@ func SetUpAuthRoutes(app *fiber.App) {
 		sess, err := store.Get(c)
 		if err != nil {
 			return err
+		}
+
+		isSignedIn := sess.Get("is-signed-in")
+		if isSignedIn == "true" {
+			_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
+
+			return nil
 		}
 
 		email := c.FormValue("email")
@@ -109,6 +123,13 @@ func SetUpAuthRoutes(app *fiber.App) {
 			return err
 		}
 
+		isSignedIn := sess.Get("is-signed-in")
+		if isSignedIn == "true" {
+			_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
+
+			return nil
+		}
+
 		errVal := getErrorIfAny(sess)
 
 		// Render index within layouts/main
@@ -123,6 +144,13 @@ func SetUpAuthRoutes(app *fiber.App) {
 		sess, err := store.Get(c)
 		if err != nil {
 			return err
+		}
+
+		isSignedIn := sess.Get("is-signed-in")
+		if isSignedIn == "true" {
+			_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
+
+			return nil
 		}
 
 		email := c.FormValue("email")
@@ -149,6 +177,13 @@ func SetUpAuthRoutes(app *fiber.App) {
 			return err
 		}
 
+		isSignedIn := sess.Get("is-signed-in")
+		if isSignedIn == "true" {
+			_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
+
+			return nil
+		}
+
 		email := sess.Get("email")
 		errVal := getErrorIfAny(sess)
 		// Render index within layouts/main
@@ -164,6 +199,13 @@ func SetUpAuthRoutes(app *fiber.App) {
 		sess, err := store.Get(c)
 		if err != nil {
 			return err
+		}
+
+		isSignedIn := sess.Get("is-signed-in")
+		if isSignedIn == "true" {
+			_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
+
+			return nil
 		}
 
 		email := sess.Get("email")
@@ -205,6 +247,13 @@ func SetUpAuthRoutes(app *fiber.App) {
 		sess, err := store.Get(c)
 		if err != nil {
 			return err
+		}
+
+		isSignedIn := sess.Get("is-signed-in")
+		if isSignedIn == "true" {
+			_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
+
+			return nil
 		}
 
 		sess.Set("email", "")
