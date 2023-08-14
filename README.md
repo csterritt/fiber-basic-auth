@@ -14,6 +14,13 @@ First, set up a file called `alg.info` which contains lines like the following:
 
     export SERVER_URL='http://localhost:3000'
     export SERVER_PORT=3000
+    export COOKIE_KEY='A 32-char, base-64-encoded string'
+
+For the `COOKIE_KEY`, you can use:
+
+    openssl rand -base64 32
+
+to generate a usable value. This should be different for development and production.
 
 You can, of course, set any `SERVER_PORT` you wish, just make sure that the port
 number matches in the `SERVER_URL`.
@@ -48,3 +55,7 @@ Fifth, using the "sqlite3.Storage" engine is probably not a great idea, particul
 if you're running on a serverless-style hosting environment where your sqlite3 database
 could suddenly disappear, since the service started a new host. Databases are supposed
 to be durable... let them do their job.
+
+Sixth, the sign-in and sign-up paths should redirect you to root if you're signed in.
+
+Seventh, sign-up should direct our new user to a welcome page with some basic info.
