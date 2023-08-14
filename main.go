@@ -5,9 +5,11 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"fiber-basic-auth/routes"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/template/jet/v2"
 )
@@ -44,6 +46,12 @@ func main() {
 	app.Use(logger.New())
 
 	app.Static("/", "./public")
+
+	app.Use(limiter.New(limiter.Config{
+		Max:               20,
+		Expiration:        30 * time.Second,
+		LimiterMiddleware: limiter.SlidingWindow{},
+	}))
 
 	routes.SetUpAuthRoutes(app)
 	routes.SetUpAppRoutes(app)
