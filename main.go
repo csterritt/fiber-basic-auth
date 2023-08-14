@@ -9,6 +9,7 @@ import (
 
 	"fiber-basic-auth/routes"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/template/jet/v2"
@@ -52,6 +53,8 @@ func main() {
 		Expiration:        30 * time.Second,
 		LimiterMiddleware: limiter.SlidingWindow{},
 	}))
+
+	app.Use(helmet.New())
 
 	routes.SetUpAuthRoutes(app)
 	routes.SetUpAppRoutes(app)
