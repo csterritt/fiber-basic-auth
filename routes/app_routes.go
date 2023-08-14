@@ -52,11 +52,11 @@ func SetUpAppRoutes(app *fiber.App) {
 			_ = sess.Save()
 
 			return c.Redirect(constants.AuthSignInPath, fiber.StatusSeeOther)
-		} else {
-			// Render index within layouts/main
-			return c.Render(constants.ProtectedPath, fiber.Map{
-				"Title": "Protected",
-			}, constants.LayoutsMainPath)
 		}
+
+		// Render index within layouts/main
+		return c.Render(constants.ProtectedPath, fiber.Map{
+			"Title": "Protected",
+		}, constants.LayoutsMainPath)
 	})
 }
