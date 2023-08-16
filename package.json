@@ -1,0 +1,14 @@
+{
+  "name": "fiber-basic-auth",
+  "version": "1.0.0",
+  "description": "# DO NOT USE THIS AS IS. You've been warned. See below for more on Production use.",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.37.0",
+    "prettier": "^3.0.2"
+  }
+}
