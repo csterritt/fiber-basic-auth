@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"log"
+
 	"fiber-basic-auth/constants"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -23,8 +25,7 @@ func SetUpAppRoutes(app *fiber.App) {
 			return err
 		}
 
-		name := sess.Get("name")
-		isSignedIn := sess.Get("is-signed-in")
+		isSignedIn := sess.Get(constants.IsSignedInKey) == constants.IsSignedInValue
 
 		// any error
 		errVal := getErrorIfAny(sess)
@@ -32,7 +33,6 @@ func SetUpAppRoutes(app *fiber.App) {
 		// Render index within layouts/main
 		return c.Render("index", fiber.Map{
 			"Title":      "Welcome!",
-			"Name":       name,
 			"IsSignedIn": isSignedIn,
 			"Error":      errVal,
 		}, constants.LayoutsMainPath)
@@ -45,11 +45,13 @@ func SetUpAppRoutes(app *fiber.App) {
 			return err
 		}
 
-		isSignedIn := sess.Get("is-signed-in")
-		if isSignedIn == nil || isSignedIn != "true" {
-			sess.Set("error", "You must be signed in to visit that page.")
-			sess.Set("url-to-return-to", c.Path())
-			_ = sess.Save()
+		isSignedIn := sess.Get(constants.IsSignedInKey)
+		if isSignedIn != constants.IsSignedInValue {
+			sess.Set(constants.ErrorKey, "You must be signed in to visit that page.")
+			sess.Set(constants.UrlToReturnToKey, c.Path())
+			if err := sess.Save(); err != nil {
+				log.Printf("========> Error saving Session: %v\n", err)
+			}
 
 			return c.Redirect(constants.AuthSignInPath, fiber.StatusSeeOther)
 		}

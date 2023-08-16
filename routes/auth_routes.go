@@ -42,10 +42,12 @@ func setupStorage() {
 }
 
 func getErrorIfAny(sess *session.Session) interface{} {
-	errVal := sess.Get("error")
+	errVal := sess.Get(constants.ErrorKey)
 	if errVal != nil && errVal != "" {
-		sess.Set("error", nil)
-		_ = sess.Save()
+		sess.Delete(constants.ErrorKey)
+		if err := sess.Save(); err != nil {
+			log.Printf("========> Error saving Session: %v\n", err)
+		}
 	}
 
 	return errVal
@@ -61,8 +63,8 @@ func getSignInUpCode() string {
 }
 
 func redirectIfSignedIn(c *fiber.Ctx, sess *session.Session) bool {
-	isSignedIn := sess.Get("is-signed-in")
-	if isSignedIn == "true" {
+	isSignedIn := sess.Get(constants.IsSignedInKey)
+	if isSignedIn == constants.IsSignedInValue {
 		_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
 
 		return true
@@ -106,16 +108,22 @@ func SetUpAuthRoutes(app *fiber.App) {
 
 		email := c.FormValue("email")
 		if isValidEmail(email) {
-			sess.Set("email", email)
+			sess.Set(constants.EmailKey, email)
 			codeVal := getSignInUpCode()
 			log.Printf("codeVal is %s\n", codeVal) // PRODUCTION: GET RID OF THIS LINE!!!
-			sess.Set("expected-code", codeVal)
-			_ = sess.Save()
+			sess.Set(constants.ExpectedCodeKey, codeVal)
+			sess.Set(constants.SubmitTimeKey, time.Now().Unix())
+			sess.Set(constants.CameFromKey, constants.AuthSignInPath)
+			if err = sess.Save(); err != nil {
+				log.Printf("========> Error saving Session: %v\n", err)
+			}
 
 			return c.Redirect(constants.AuthEnterCodePath, fiber.StatusSeeOther)
 		} else {
-			sess.Set("error", "You must provide an email.")
-			_ = sess.Save()
+			sess.Set(constants.ErrorKey, "You must provide an email.")
+			if err = sess.Save(); err != nil {
+				log.Printf("========> Error saving Session: %v\n", err)
+			}
 
 			return c.Redirect(constants.AuthSignInPath, fiber.StatusSeeOther)
 		}
@@ -154,16 +162,22 @@ func SetUpAuthRoutes(app *fiber.App) {
 
 		email := c.FormValue("email")
 		if isValidEmail(email) {
-			sess.Set("email", email)
+			sess.Set(constants.EmailKey, email)
 			codeVal := getSignInUpCode()
 			log.Printf("codeVal is %s\n", codeVal) // PRODUCTION: GET RID OF THIS LINE!!!
-			sess.Set("expected-code", codeVal)
-			_ = sess.Save()
+			sess.Set(constants.ExpectedCodeKey, codeVal)
+			sess.Set(constants.SubmitTimeKey, time.Now().Unix())
+			sess.Set(constants.CameFromKey, constants.AuthSignUpPath)
+			if err = sess.Save(); err != nil {
+				log.Printf("========> Error saving Session: %v\n", err)
+			}
 
 			return c.Redirect(constants.AuthEnterCodePath, fiber.StatusSeeOther)
 		} else {
-			sess.Set("error", "You must provide an email.")
-			_ = sess.Save()
+			sess.Set(constants.ErrorKey, "You must provide an email.")
+			if err = sess.Save(); err != nil {
+				log.Printf("========> Error saving Session: %v\n", err)
+			}
 
 			return c.Redirect(constants.AuthSignUpPath, fiber.StatusSeeOther)
 		}
@@ -180,7 +194,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 			return nil
 		}
 
-		email := sess.Get("email")
+		email := sess.Get(constants.EmailKey)
 		errVal := getErrorIfAny(sess)
 		// Render index within layouts/main
 		return c.Render(constants.AuthEnterCodePath, fiber.Map{
@@ -201,35 +215,54 @@ func SetUpAuthRoutes(app *fiber.App) {
 			return nil
 		}
 
-		email := sess.Get("email")
+		email := sess.Get(constants.EmailKey)
 		if email == "" {
-			sess.Set("error", "You must provide an email address.")
-			_ = sess.Save()
+			sess.Set(constants.ErrorKey, "You must provide an email address.")
+			if err = sess.Save(); err != nil {
+				log.Printf("========> Error saving Session: %v\n", err)
+			}
 
 			return c.Redirect(constants.AuthSignInPath, fiber.StatusSeeOther)
 		}
 
+		timeSubmitted := sess.Get(constants.SubmitTimeKey)
+		if timeSubmitted != nil && time.Now().Unix()-timeSubmitted.(int64) > constants.TwentyMinutesInSeconds {
+			log.Printf("Code expired %v ago.", time.Now().Sub(timeSubmitted.(time.Time)))
+			cameFrom := sess.Get(constants.CameFromKey).(string)
+			sess.Delete(constants.ExpectedCodeKey)
+			sess.Delete(constants.CameFromKey)
+			sess.Set(constants.ErrorKey, "the code has expired, please try again")
+			return c.Redirect(cameFrom, fiber.StatusSeeOther)
+		}
+
 		code := c.FormValue("code")
-		expectedCode := sess.Get("expected-code")
+		expectedCode := sess.Get(constants.ExpectedCodeKey)
 		if code == "" {
-			sess.Set("error", "You must provide the code.") // PRODUCTION: Might want to indicate where it is
-			_ = sess.Save()
+			sess.Set(constants.ErrorKey, "You must provide the code.") // PRODUCTION: Might want to indicate where to expect the code (e.g., email, spam filter)
+			if err = sess.Save(); err != nil {
+				log.Printf("========> Error saving Session: %v\n", err)
+			}
 
 			return c.Redirect(constants.AuthEnterCodePath, fiber.StatusSeeOther)
 		} else if code != expectedCode {
-			sess.Set("error", "That code is incorrect or expired.")
-			_ = sess.Save()
+			sess.Set(constants.ErrorKey, "That code is incorrect or has expired.")
+			if err = sess.Save(); err != nil {
+				log.Printf("========> Error saving Session: %v\n", err)
+			}
 
 			return c.Redirect(constants.AuthEnterCodePath, fiber.StatusSeeOther)
 		} else {
-			pathToGoTo := sess.Get("url-to-return-to")
+			pathToGoTo := sess.Get(constants.UrlToReturnToKey)
 			if pathToGoTo == nil || pathToGoTo == "" {
 				pathToGoTo = constants.IndexPath
 			}
-			sess.Set("code", "")
-			sess.Set("is-signed-in", "true")
-			sess.Set("url-to-return-to", "")
-			_ = sess.Save()
+			sess.Delete(constants.ExpectedCodeKey)
+			sess.Delete(constants.UrlToReturnToKey)
+			sess.Delete(constants.CameFromKey)
+			sess.Set(constants.IsSignedInKey, constants.IsSignedInValue)
+			if err = sess.Save(); err != nil {
+				log.Printf("========> Error saving Session: %v\n", err)
+			}
 
 			return c.Redirect(pathToGoTo.(string), fiber.StatusSeeOther)
 		}
@@ -246,10 +279,13 @@ func SetUpAuthRoutes(app *fiber.App) {
 			return nil
 		}
 
-		sess.Set("email", "")
-		sess.Set("code", "")
-		sess.Set("url-to-return-to", "")
-		_ = sess.Save()
+		sess.Delete(constants.EmailKey)
+		sess.Delete(constants.ExpectedCodeKey)
+		sess.Delete(constants.CameFromKey)
+		sess.Delete(constants.UrlToReturnToKey)
+		if err = sess.Save(); err != nil {
+			log.Printf("========> Error saving Session: %v\n", err)
+		}
 
 		return c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
 	})
@@ -261,11 +297,14 @@ func SetUpAuthRoutes(app *fiber.App) {
 			return err
 		}
 
-		sess.Set("email", "")
-		sess.Set("code", "")
-		sess.Set("is-signed-in", "")
-		sess.Set("url-to-return-to", "")
-		_ = sess.Save()
+		sess.Delete(constants.IsSignedInKey)
+		sess.Delete(constants.EmailKey)
+		sess.Delete(constants.ExpectedCodeKey)
+		sess.Delete(constants.CameFromKey)
+		sess.Delete(constants.UrlToReturnToKey)
+		if err = sess.Save(); err != nil {
+			log.Printf("========> Error saving Session: %v\n", err)
+		}
 
 		return c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
 	})

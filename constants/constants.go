@@ -12,3 +12,15 @@ const AuthCancelPath = "/auth/cancel-sign-in"
 const IndexPath = "/"
 const LayoutsMainPath = "/layouts/main"
 const ProtectedPath = "/protected"
+
+const CameFromKey = "came-from-key"
+const EmailKey = "email-key"
+const ErrorKey = "error-key"
+const ExpectedCodeKey = "expected-code-key"
+const IsSignedInKey = "is-signed-in-key"
+const SubmitTimeKey = "submit-time-key"
+const UrlToReturnToKey = "url-to-return-to-key"
+
+const IsSignedInValue = "TrUe"
+
+const TwentyMinutesInSeconds = 20 * 60

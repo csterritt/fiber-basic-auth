@@ -10,7 +10,7 @@
     signed in.
 </p>
 
-{{ if IsSignedIn == "true" }}
+{{ if IsSignedIn }}
 <p>
     <form method="POST" action="/auth/sign-out">
         <button>Sign out</button>

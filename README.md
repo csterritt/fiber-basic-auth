@@ -58,3 +58,7 @@ to be durable... let them do their job.
 
 Sixth, sign-up should direct our new user to a welcome page with some basic info. Or
 maybe it's just a pop-up/toast/other notification.
+
+Seventh, allow resubmitting the code (but only after a suitable interval).
+
+Eighth, when the session fails to save, redirect to a 500 error page, notify admins.
