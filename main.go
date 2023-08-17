@@ -52,11 +52,13 @@ func main() {
 
 	app.Static("/", "./public")
 
-	app.Use(limiter.New(limiter.Config{
-		Max:               20,
-		Expiration:        30 * time.Second,
-		LimiterMiddleware: limiter.SlidingWindow{},
-	}))
+	if os.Getenv("DEBUG") == "" {
+		app.Use(limiter.New(limiter.Config{
+			Max:               20,
+			Expiration:        30 * time.Second,
+			LimiterMiddleware: limiter.SlidingWindow{},
+		}))
+	}
 
 	app.Use(helmet.New())
 

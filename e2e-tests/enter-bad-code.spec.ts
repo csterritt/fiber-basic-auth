@@ -16,7 +16,6 @@ test('test', async ({ page }) => {
     )
   ).toBeVisible()
 
-  await page.getByPlaceholder('email').click()
   await page.getByPlaceholder('email').fill('x@yy.com')
   await page.getByRole('button', { name: 'Submit' }).click()
 
@@ -26,7 +25,6 @@ test('test', async ({ page }) => {
     })
   ).toBeVisible()
 
-  await page.getByPlaceholder('code').click()
   await page.getByPlaceholder('code').fill('1234')
   await page.getByRole('button', { name: 'Submit' }).click()
 
