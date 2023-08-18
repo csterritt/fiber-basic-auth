@@ -33,7 +33,7 @@ Now you can visit `http://localhost:3000` to see the basic page and do the whole
 or sign up flow (but you'll have to read the magic code off of the log. In production,
 don't log that value, obviously!).
 
-#### Production use
+## Production use
 
 **NOTE**: There is a script here named `prod_deploy`. Currently, it's set up to do a
 Linux build (via the `linux_build` script), and then fail. The `linux_build` script
@@ -46,7 +46,7 @@ modified files. Finally, if that succeeds, `prod_deploy` deploys your code to yo
 production server(s) or service(s), or at least it will once you write that code!
 For now, it just `echo`s success and exits.
 
-First of all, you'll have to figure out some way to get the magic code to your
+First, you'll have to figure out some way to get the magic code to your
 users! There's nothing here (yet) to support that. All the text mentions emails;
 if you want to use something else, like text messages, change that too.
 
@@ -58,9 +58,10 @@ you fail to enter the code properly some small number of times (like, three). No
 really, someone will write a bot to try all 900,000 different codes. Right now, that
 would work (eventually).
 
-Fourth, search the source for the phrase "PRODUCTION:". You'll find a number of places
+Fourth, search the source for the phrase `PRODUCTION:`. You'll find a number of places
 where it's *extremely highly recommended* that you take some particular action. Do what
-it says.
+it says. Note that `PRODUCTION:REMOVE` lines will be automatically removed by the
+`linux_build` script, as mentioned above.
 
 Fifth, using the "sqlite3.Storage" engine is probably not a great idea, particularly
 if you're running on a serverless-style hosting environment where your sqlite3 database
