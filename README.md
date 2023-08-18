@@ -42,7 +42,9 @@ This type of host may not be what you want, but you **definitely** want the
 `PRODUCTION:REMOVE` lines to be removed in any code you deploy to production.
 Before doing this removal, the script verifies that there is no code currently checked
 out. Then it removes those lines, compiles the code, and does a `git reset` on any
-modified files.
+modified files. Finally, if that succeeds, `prod_deploy` deploys your code to your
+production server(s) or service(s), or at least it will once you write that code!
+For now, it just `echo`s success and exits.
 
 First of all, you'll have to figure out some way to get the magic code to your
 users! There's nothing here (yet) to support that. All the text mentions emails;

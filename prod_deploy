@@ -1,3 +1,3 @@
 #!/bin/bash -e -x
 ./linux_build && \
-  flyctl deploy
+  echo 'Insert your deploy command(s) here.'
