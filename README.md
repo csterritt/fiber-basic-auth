@@ -33,6 +33,26 @@ Now you can visit `http://localhost:3000` to see the basic page and do the whole
 or sign up flow (but you'll have to read the magic code off of the log. In production,
 don't log that value, obviously!).
 
+## Testing
+
+If you want to run the end-to-end tests, make sure you have Node version 16 or later
+installed, and run:
+
+    npm install
+
+Then you can run all the end-to-end tests via the Playwright testing environment with
+the command:
+
+    ./run-e2e-tests
+
+You can run one specific test by naming it on the command line, e.g.
+
+    ./run-e2e-tests e2e-tests/visit-sign-up-return.spec.ts
+
+You can run the Playwright `codegen` tool with the `codegen` script, or bring up the
+Playwright UI (which allows inspection of tests at each step) with the `ui-tests`
+script.
+
 ## Production use
 
 **NOTE**: There is a script here named `prod_deploy`. Currently, it's set up to do a
