@@ -52,20 +52,20 @@ func main() {
 
 	app.Static("/", "./public")
 
-	if os.Getenv("DEBUG") == "" {
+	if os.Getenv("DEBUG") == "" { // PRODUCTION:REMOVE
 		app.Use(limiter.New(limiter.Config{
 			Max:               20,
 			Expiration:        30 * time.Second,
 			LimiterMiddleware: limiter.SlidingWindow{},
 		}))
-	}
+	} // PRODUCTION:REMOVE
 
 	app.Use(helmet.New())
 
 	app.Use(cors.New())
 	app.Use(cors.New(cors.Config{
 		//AllowOrigins: "https://the-final-website.com", // PRODUCTION: Comment in, set this to your site(s)
-		AllowOrigins: "http://localhost:3000", // PRODUCTION: REMOVE THIS LINE or comment it out
+		AllowOrigins: "http://localhost:3000", // PRODUCTION:REMOVE
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 

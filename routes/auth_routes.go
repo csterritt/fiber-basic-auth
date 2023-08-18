@@ -123,7 +123,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 		if isValidEmail(email) {
 			sess.Set(constants.EmailKey, email)
 			codeVal := getSignInUpCode()
-			log.Printf("codeVal is %s\n", codeVal) // PRODUCTION: GET RID OF THIS LINE!!!
+			log.Printf("codeVal is %s\n", codeVal) // PRODUCTION:REMOVE
 			sess.Set(constants.ExpectedCodeKey, codeVal)
 			sess.Set(constants.SubmitTimeKey, time.Now().Unix())
 			sess.Set(constants.CameFromKey, constants.AuthSignInPath)
@@ -178,7 +178,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 		if isValidEmail(email) {
 			sess.Set(constants.EmailKey, email)
 			codeVal := getSignInUpCode()
-			log.Printf("codeVal is %s\n", codeVal) // PRODUCTION: GET RID OF THIS LINE!!!
+			log.Printf("codeVal is %s\n", codeVal) // PRODUCTION:REMOVE
 			sess.Set(constants.ExpectedCodeKey, codeVal)
 			sess.Set(constants.SubmitTimeKey, time.Now().Unix())
 			sess.Set(constants.CameFromKey, constants.AuthSignUpPath)

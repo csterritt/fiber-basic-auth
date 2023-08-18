@@ -35,6 +35,15 @@ don't log that value, obviously!).
 
 #### Production use
 
+**NOTE**: There is a script here named `prod_deploy`. Currently, it's set up to do a
+Linux build (via the `linux_build` script), and then fail. The `linux_build` script
+removes any lines with a `PRODUCTION:REMOVE` comment, then compiles for a linux host.
+This type of host may not be what you want, but you **definitely** want the
+`PRODUCTION:REMOVE` lines to be removed in any code you deploy to production.
+Before doing this removal, the script verifies that there is no code currently checked
+out. Then it removes those lines, compiles the code, and does a `git reset` on any
+modified files.
+
 First of all, you'll have to figure out some way to get the magic code to your
 users! There's nothing here (yet) to support that. All the text mentions emails;
 if you want to use something else, like text messages, change that too.
