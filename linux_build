@@ -1,8 +1,8 @@
 #!/bin/bash
-if [ `\git status | \egrep -i '(Changes to be committed)|(Changes not staged for commit)' | \wc -l` != 0 ] ; then
+if [ `\git status | \egrep -i 'nothing to commit, working tree clean' | \wc -l` = 0 ] ; then
   echo "ERROR: You cannot build for linux with checked out changes."
   exit 1
 fi
 
 GOOS=linux GOARCH=amd64 go build main.go
-#\mv main fiber-basic-auth
+\mv main fiber-basic-auth
