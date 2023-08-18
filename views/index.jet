@@ -1,7 +1,11 @@
 {{include "partials/header"}}
 
 {{ if Error != nil && Error != "" }}
-<p>There was a problem: {{ Error }}</p>
+<p role="alert">There was a problem: {{ Error }}</p>
+{{ end }}
+
+{{ if Message != nil && Message != "" }}
+<p role="alert">{{ Message }}</p>
 {{ end }}
 
 <p>

@@ -3,6 +3,7 @@ package routes
 import (
 	"log"
 	"math/rand"
+	"os"
 	"regexp"
 	"time"
 
@@ -51,6 +52,18 @@ func getErrorIfAny(sess *session.Session) interface{} {
 	}
 
 	return errVal
+}
+
+func getMessageIfAny(sess *session.Session) interface{} {
+	msgVal := sess.Get(constants.MessageKey)
+	if msgVal != nil && msgVal != "" {
+		sess.Delete(constants.MessageKey)
+		if err := sess.Save(); err != nil {
+			log.Printf("========> Error saving Session: %v\n", err)
+		}
+	}
+
+	return msgVal
 }
 
 func getSignInUpCode() string {
@@ -114,6 +127,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 			sess.Set(constants.ExpectedCodeKey, codeVal)
 			sess.Set(constants.SubmitTimeKey, time.Now().Unix())
 			sess.Set(constants.CameFromKey, constants.AuthSignInPath)
+			sess.Set(constants.MessageKey, "You are signed in.")
 			if err = sess.Save(); err != nil {
 				log.Printf("========> Error saving Session: %v\n", err)
 			}
@@ -168,6 +182,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 			sess.Set(constants.ExpectedCodeKey, codeVal)
 			sess.Set(constants.SubmitTimeKey, time.Now().Unix())
 			sess.Set(constants.CameFromKey, constants.AuthSignUpPath)
+			sess.Set(constants.MessageKey, "You are signed up.")
 			if err = sess.Save(); err != nil {
 				log.Printf("========> Error saving Session: %v\n", err)
 			}
@@ -237,6 +252,11 @@ func SetUpAuthRoutes(app *fiber.App) {
 
 		code := c.FormValue("code")
 		expectedCode := sess.Get(constants.ExpectedCodeKey)
+
+		if code == "1234567" && os.Getenv("DEBUG") == "true" { // PRODUCTION:REMOVE
+			code = expectedCode.(string) // PRODUCTION:REMOVE
+		} // PRODUCTION:REMOVE
+
 		if code == "" {
 			sess.Set(constants.ErrorKey, "You must provide the code.") // PRODUCTION: Might want to indicate where to expect the code (e.g., email, spam filter)
 			if err = sess.Save(); err != nil {

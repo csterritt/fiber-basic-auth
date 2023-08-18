@@ -18,6 +18,7 @@ const EmailKey = "email-key"
 const ErrorKey = "error-key"
 const ExpectedCodeKey = "expected-code-key"
 const IsSignedInKey = "is-signed-in-key"
+const MessageKey = "message-key"
 const SubmitTimeKey = "submit-time-key"
 const UrlToReturnToKey = "url-to-return-to-key"
 

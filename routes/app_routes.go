@@ -29,12 +29,14 @@ func SetUpAppRoutes(app *fiber.App) {
 
 		// any error
 		errVal := getErrorIfAny(sess)
+		msgVal := getMessageIfAny(sess)
 
 		// Render index within layouts/main
 		return c.Render("index", fiber.Map{
 			"Title":      "Welcome!",
 			"IsSignedIn": isSignedIn,
 			"Error":      errVal,
+			"Message":    msgVal,
 		}, constants.LayoutsMainPath)
 	})
 
