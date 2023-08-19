@@ -6,14 +6,9 @@ test('test', async ({ page }) => {
     page.getByRole('heading', { name: 'A basic sign-in protected website.' })
   ).toBeVisible()
 
-  await page.getByRole('link', { name: 'The protected page' }).click()
+  await page.getByRole('link', { name: 'Sign up' }).click()
   await expect(
-    page.getByRole('heading', { name: 'Sign In Page' })
-  ).toBeVisible()
-  await expect(
-    page.getByText(
-      'There was a problem: You must be signed in to visit that page.'
-    )
+    page.getByRole('heading', { name: 'Sign Up Page' })
   ).toBeVisible()
 
   await page.getByPlaceholder('email').fill('x@yy.com')
@@ -33,9 +28,6 @@ test('test', async ({ page }) => {
       name: 'Enter your magic code here for email address x@yy.com.',
     })
   ).toBeVisible()
-  await expect(
-    page.getByText(
-      'There was a problem: That code is incorrect or has expired.'
-    )
-  ).toBeVisible()
+  const text = await page.getByRole('alert').innerText()
+  expect(text === 'There was a problem: That code is incorrect.').toBeTruthy()
 })

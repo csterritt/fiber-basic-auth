@@ -70,7 +70,8 @@ First, you'll have to figure out some way to get the magic code to your
 users! There's nothing here (yet) to support that. All the text mentions emails;
 if you want to use something else, like text messages, change that too.
 
-Second, the codes don't expire in twenty minutes or so. Gotta fix that.
+Second, the codes expire in twenty minutes. You can change this duration by
+setting the `CodeExpireTimeInSeconds` value in `constants.constants.go`.
 
 Third, there is no check that someone is just trying *every possible code*. Really,
 it should fail hard (i.e., get rid of the current code and make you try again) if

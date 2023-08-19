@@ -241,16 +241,29 @@ func SetUpAuthRoutes(app *fiber.App) {
 		}
 
 		timeSubmitted := sess.Get(constants.SubmitTimeKey)
-		if timeSubmitted != nil && time.Now().Unix()-timeSubmitted.(int64) > constants.TwentyMinutesInSeconds {
-			log.Printf("Code expired %v ago.", time.Now().Sub(timeSubmitted.(time.Time)))
+		isExpired := timeSubmitted == nil || time.Now().Unix()-timeSubmitted.(int64) > constants.CodeExpireTimeInSeconds
+		code := c.FormValue("code")
+
+		if code == "7654321" && os.Getenv("DEBUG") == "true" { // PRODUCTION:REMOVE
+			isExpired = true // PRODUCTION:REMOVE
+		} // PRODUCTION:REMOVE
+
+		if isExpired {
+			if timeSubmitted == nil {
+				log.Printf("Time submitted is somehow nil?!?\n")
+			} else {
+				log.Printf("Code expired %v seconds ago.\n", time.Now().Unix()-timeSubmitted.(int64))
+			}
 			cameFrom := sess.Get(constants.CameFromKey).(string)
 			sess.Delete(constants.ExpectedCodeKey)
 			sess.Delete(constants.CameFromKey)
-			sess.Set(constants.ErrorKey, "the code has expired, please try again")
+			sess.Set(constants.ErrorKey, "The code has expired, please try again.")
+			if err = sess.Save(); err != nil {
+				log.Printf("========> Error saving Session: %v\n", err)
+			}
+
 			return c.Redirect(cameFrom, fiber.StatusSeeOther)
 		}
-
-		code := c.FormValue("code")
 		expectedCode := sess.Get(constants.ExpectedCodeKey)
 
 		if code == "1234567" && os.Getenv("DEBUG") == "true" { // PRODUCTION:REMOVE
@@ -265,7 +278,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 
 			return c.Redirect(constants.AuthEnterCodePath, fiber.StatusSeeOther)
 		} else if code != expectedCode {
-			sess.Set(constants.ErrorKey, "That code is incorrect or has expired.")
+			sess.Set(constants.ErrorKey, "That code is incorrect.")
 			if err = sess.Save(); err != nil {
 				log.Printf("========> Error saving Session: %v\n", err)
 			}

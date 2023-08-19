@@ -24,4 +24,4 @@ const UrlToReturnToKey = "url-to-return-to-key"
 
 const IsSignedInValue = "TrUe"
 
-const TwentyMinutesInSeconds = 20 * 60
+const CodeExpireTimeInSeconds = 20 * 60

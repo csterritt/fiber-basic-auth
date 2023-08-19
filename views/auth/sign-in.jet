@@ -3,7 +3,7 @@
 <h4>Sign In Page</h4>
 
 {{ if Error != nil && Error != "" }}
-<p>There was a problem: {{ Error }}</p>
+<p role="alert">There was a problem: {{ Error }}</p>
 {{ end }}
 
 <p>

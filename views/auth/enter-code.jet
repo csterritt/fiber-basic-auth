@@ -3,7 +3,7 @@
 <h4>Enter your magic code here for email address {{ Email }}.</h4>
 
 {{ if Error != nil && Error != "" }}
-<p>There was a problem: {{ Error }}</p>
+<p role="alert">There was a problem: {{ Error }}</p>
 {{ end }}
 
 <p>
