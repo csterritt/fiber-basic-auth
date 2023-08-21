@@ -95,3 +95,7 @@ maybe it's just a pop-up/toast/other notification.
 Seventh, allow resubmitting the code (but only after a suitable interval).
 
 Eighth, when the session fails to save, redirect to a 500 error page, notify admins.
+
+## License
+
+See the LICENSE.txt file.
