@@ -73,11 +73,9 @@ if you want to use something else, like text messages, change that too.
 Second, the codes expire in twenty minutes. You can change this duration by
 setting the `CodeExpireTimeInSeconds` value in `constants.constants.go`.
 
-Third, there is no check that someone is just trying *every possible code*. Really,
-it should fail hard (i.e., get rid of the current code and make you try again) if
-you fail to enter the code properly some small number of times (like, three). No,
-really, someone will write a bot to try all 900,000 different codes. Right now, that
-would work (eventually).
+Third, to prevent someone trying *every possible code*, the user will get a failure
+if they enter a wrong code more than three times. You can change the failure  count
+by setting the `WrongCodeFailureCount` value in `constants.constants.go`.
 
 Fourth, search the source for the phrase `PRODUCTION:`. You'll find a number of places
 where it's *extremely highly recommended* that you take some particular action. Do what

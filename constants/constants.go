@@ -21,7 +21,9 @@ const IsSignedInKey = "is-signed-in-key"
 const MessageKey = "message-key"
 const SubmitTimeKey = "submit-time-key"
 const UrlToReturnToKey = "url-to-return-to-key"
+const WrongCodeEnteredCount = "wrong-code-entered-count"
 
 const IsSignedInValue = "TrUe"
 
 const CodeExpireTimeInSeconds = 20 * 60
+const WrongCodeFailureCount = 3

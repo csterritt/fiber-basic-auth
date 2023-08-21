@@ -278,7 +278,27 @@ func SetUpAuthRoutes(app *fiber.App) {
 
 			return c.Redirect(constants.AuthEnterCodePath, fiber.StatusSeeOther)
 		} else if code != expectedCode {
+			countVal := sess.Get(constants.WrongCodeEnteredCount)
+			var count = 0
+			if countVal != nil {
+				count = countVal.(int)
+			}
+			count += 1
+			if count > constants.WrongCodeFailureCount {
+				sess.Delete(constants.WrongCodeEnteredCount)
+				sess.Delete(constants.EmailKey)
+				sess.Delete(constants.ExpectedCodeKey)
+				sess.Delete(constants.UrlToReturnToKey)
+				sess.Delete(constants.CameFromKey)
+				sess.Set(constants.ErrorKey, "The wrong code was given too many times.")
+				if err = sess.Save(); err != nil {
+					log.Printf("========> Error saving Session: %v\n", err)
+				}
+				return c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
+			}
+
 			sess.Set(constants.ErrorKey, "That code is incorrect.")
+			sess.Set(constants.WrongCodeEnteredCount, count)
 			if err = sess.Save(); err != nil {
 				log.Printf("========> Error saving Session: %v\n", err)
 			}

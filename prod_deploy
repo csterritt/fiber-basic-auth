@@ -1,7 +1,7 @@
 #!/bin/bash -e -x
 # Can only be run in a safe deploy environment
 if [ `\git status | \egrep -i 'nothing to commit, working tree clean' | \wc -l` = 0 ] ; then
-  echo "ERROR: You cannot build for linux with checked out changes."
+  echo "ERROR: You cannot deploy to production with checked out changes."
   exit 1
 fi
 
