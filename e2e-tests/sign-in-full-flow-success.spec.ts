@@ -24,7 +24,7 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'Submit' }).click()
 
   const text = await page.getByRole('alert').innerText()
-  await expect(text === 'You are signed in.').toBeTruthy()
+  expect(text === 'You are signed in.').toBeTruthy()
 
   await page.getByRole('button', { name: 'Sign out' }).click()
 

@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"log"
-
 	"fiber-basic-auth/constants"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -19,48 +17,37 @@ func SetUpAppRoutes(app *fiber.App) {
 	}
 
 	app.Get(constants.IndexPath, func(c *fiber.Ctx) error {
-		// Get session from storage
-		sess, err := store.Get(c)
-		if err != nil {
-			return err
-		}
+		return withSession(c, func(c *fiber.Ctx, sess *session.Session) error {
+			isSignedIn := sess.Get(constants.IsSignedInKey) == constants.IsSignedInValue
 
-		isSignedIn := sess.Get(constants.IsSignedInKey) == constants.IsSignedInValue
+			// any error
+			errVal := getErrorIfAny(sess)
+			msgVal := getMessageIfAny(sess)
 
-		// any error
-		errVal := getErrorIfAny(sess)
-		msgVal := getMessageIfAny(sess)
-
-		// Render index within layouts/main
-		return c.Render("index", fiber.Map{
-			"Title":      "Welcome!",
-			"IsSignedIn": isSignedIn,
-			"Error":      errVal,
-			"Message":    msgVal,
-		}, constants.LayoutsMainPath)
+			// Render index within layouts/main
+			return c.Render("index", fiber.Map{
+				"Title":      "Welcome!",
+				"IsSignedIn": isSignedIn,
+				"Error":      errVal,
+				"Message":    msgVal,
+			}, constants.LayoutsMainPath)
+		})
 	})
 
 	app.Get(constants.ProtectedPath, func(c *fiber.Ctx) error {
-		// Get session from storage
-		sess, err := store.Get(c)
-		if err != nil {
-			return err
-		}
+		return withSession(c, func(c *fiber.Ctx, sess *session.Session) error {
+			isSignedIn := sess.Get(constants.IsSignedInKey)
+			if isSignedIn != constants.IsSignedInValue {
+				sess.Set(constants.ErrorKey, "You must be signed in to visit that page.")
+				sess.Set(constants.UrlToReturnToKey, c.Path())
 
-		isSignedIn := sess.Get(constants.IsSignedInKey)
-		if isSignedIn != constants.IsSignedInValue {
-			sess.Set(constants.ErrorKey, "You must be signed in to visit that page.")
-			sess.Set(constants.UrlToReturnToKey, c.Path())
-			if err := sess.Save(); err != nil {
-				log.Printf("========> Error saving Session: %v\n", err)
+				return c.Redirect(constants.AuthSignInPath, fiber.StatusSeeOther)
 			}
 
-			return c.Redirect(constants.AuthSignInPath, fiber.StatusSeeOther)
-		}
-
-		// Render index within layouts/main
-		return c.Render(constants.ProtectedPath, fiber.Map{
-			"Title": "Protected",
-		}, constants.LayoutsMainPath)
+			// Render index within layouts/main
+			return c.Render(constants.ProtectedPath, fiber.Map{
+				"Title": "Protected",
+			}, constants.LayoutsMainPath)
+		})
 	})
 }
