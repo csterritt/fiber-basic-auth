@@ -2,6 +2,14 @@
 
 <p><a href="/">Back to the main page.</a></p>
 
+{{ if Error != nil && Error != "" }}
+<p role="alert">There was a problem: {{ Error }}</p>
+{{ end }}
+
+{{ if Message != nil && Message != "" }}
+<p role="alert">{{ Message }}</p>
+{{ end }}
+
 <p>
     <form method="POST" action="/auth/sign-out">
         <button>Sign out</button>

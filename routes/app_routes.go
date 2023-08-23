@@ -13,7 +13,6 @@ func SetUpAppRoutes(app *fiber.App) {
 		return wrapped_session.WithSession(c, func(c *fiber.Ctx, sess *wrapped_session.WrappedSession) error {
 			isSignedIn := sess.Get(constants.IsSignedInKey) == constants.IsSignedInValue
 
-			// any error
 			errVal := getErrorIfAny(sess)
 			msgVal := getMessageIfAny(sess)
 
@@ -37,9 +36,14 @@ func SetUpAppRoutes(app *fiber.App) {
 				return c.Redirect(constants.AuthSignInPath, fiber.StatusSeeOther)
 			}
 
+			errVal := getErrorIfAny(sess)
+			msgVal := getMessageIfAny(sess)
+
 			// Render index within layouts/main
 			return c.Render(constants.ProtectedPath, fiber.Map{
-				"Title": "Protected",
+				"Title":   "Protected",
+				"Error":   errVal,
+				"Message": msgVal,
 			}, constants.LayoutsMainPath)
 		})
 	})
