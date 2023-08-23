@@ -43,7 +43,7 @@ func setupStorage() {
 	}
 }
 
-func getErrorIfAny(sess *session.Session) interface{} {
+func getErrorIfAny(sess *WrappedSession) interface{} {
 	errVal := sess.Get(constants.ErrorKey)
 	if errVal != nil && errVal != "" {
 		sess.Delete(constants.ErrorKey)
@@ -52,7 +52,7 @@ func getErrorIfAny(sess *session.Session) interface{} {
 	return errVal
 }
 
-func getMessageIfAny(sess *session.Session) interface{} {
+func getMessageIfAny(sess *WrappedSession) interface{} {
 	msgVal := sess.Get(constants.MessageKey)
 	if msgVal != nil && msgVal != "" {
 		sess.Delete(constants.MessageKey)
@@ -70,7 +70,7 @@ func getSignInUpCode() string {
 	return result
 }
 
-func redirectIfSignedIn(c *fiber.Ctx, sess *session.Session) bool {
+func redirectIfSignedIn(c *fiber.Ctx, sess *WrappedSession) bool {
 	isSignedIn := sess.Get(constants.IsSignedInKey)
 	if isSignedIn == constants.IsSignedInValue {
 		_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
@@ -81,15 +81,38 @@ func redirectIfSignedIn(c *fiber.Ctx, sess *session.Session) bool {
 	return false
 }
 
-func withSession(c *fiber.Ctx, wrapt func(c *fiber.Ctx, sess *session.Session) error) error {
+type WrappedSession struct {
+	dirty         bool
+	actualSession *session.Session
+}
+
+func (ms *WrappedSession) Get(key string) interface{} {
+	return ms.actualSession.Get(key)
+}
+
+func (ms *WrappedSession) Set(key string, value interface{}) {
+	ms.actualSession.Set(key, value)
+	ms.dirty = true
+}
+
+func (ms *WrappedSession) Delete(key string) {
+	ms.actualSession.Delete(key)
+	ms.dirty = true
+}
+
+func withSession(c *fiber.Ctx, wrapt func(c *fiber.Ctx, sess *WrappedSession) error) error {
 	sess, err := store.Get(c)
 	if err != nil {
 		return err
 	}
 
-	err = wrapt(c, sess)
+	mySess := WrappedSession{
+		dirty:         false,
+		actualSession: sess,
+	}
+	err = wrapt(c, &mySess)
 
-	if err == nil {
+	if err == nil && mySess.dirty {
 		if err = sess.Save(); err != nil {
 			log.Printf("========> Error saving Session: %v\n", err)
 		}
@@ -102,7 +125,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	setupStorage()
 
 	app.Get(constants.AuthSignInPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *session.Session) error {
+		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
 			if redirectIfSignedIn(c, sess) {
 				return nil
 			}
@@ -118,7 +141,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	})
 
 	app.Post(constants.AuthSubmitSignInPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *session.Session) error {
+		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
 			if redirectIfSignedIn(c, sess) {
 				return nil
 			}
@@ -142,7 +165,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	})
 
 	app.Get(constants.AuthSignUpPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *session.Session) error {
+		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
 			if redirectIfSignedIn(c, sess) {
 				return nil
 			}
@@ -158,7 +181,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	})
 
 	app.Post(constants.AuthSubmitSignUpPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *session.Session) error {
+		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
 			if redirectIfSignedIn(c, sess) {
 				return nil
 			}
@@ -182,7 +205,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	})
 
 	app.Get(constants.AuthEnterCodePath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *session.Session) error {
+		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
 			if redirectIfSignedIn(c, sess) {
 				return nil
 			}
@@ -199,7 +222,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	})
 
 	app.Post(constants.AuthSubmitCodePath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *session.Session) error {
+		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
 			if redirectIfSignedIn(c, sess) {
 				return nil
 			}
@@ -286,7 +309,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	})
 
 	app.Post(constants.AuthCancelPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *session.Session) error {
+		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
 			if redirectIfSignedIn(c, sess) {
 				return nil
 			}
@@ -301,7 +324,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	})
 
 	app.Post(constants.AuthSignOutPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *session.Session) error {
+		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
 			sess.Delete(constants.IsSignedInKey)
 			sess.Delete(constants.EmailKey)
 			sess.Delete(constants.ExpectedCodeKey)

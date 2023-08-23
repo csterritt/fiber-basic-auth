@@ -17,7 +17,7 @@ func SetUpAppRoutes(app *fiber.App) {
 	}
 
 	app.Get(constants.IndexPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *session.Session) error {
+		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
 			isSignedIn := sess.Get(constants.IsSignedInKey) == constants.IsSignedInValue
 
 			// any error
@@ -35,7 +35,7 @@ func SetUpAppRoutes(app *fiber.App) {
 	})
 
 	app.Get(constants.ProtectedPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *session.Session) error {
+		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
 			isSignedIn := sess.Get(constants.IsSignedInKey)
 			if isSignedIn != constants.IsSignedInValue {
 				sess.Set(constants.ErrorKey, "You must be signed in to visit that page.")
