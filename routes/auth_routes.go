@@ -9,15 +9,12 @@ import (
 	"time"
 
 	"fiber-basic-auth/constants"
+	"fiber-basic-auth/wrapped_session"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
-	"github.com/gofiber/storage/sqlite3"
 )
 
 var digits = [10]string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
 
-var storage *sqlite3.Storage // PRODUCTION: You probably want to use something else, especially on a serverless host
-var store *session.Store
 var emailPattern *regexp.Regexp
 
 func init() {
@@ -29,21 +26,7 @@ func isValidEmail(email string) bool {
 	return emailPattern.MatchString(email)
 }
 
-func setupStorage() {
-	if storage == nil {
-		storage = sqlite3.New() // From github.com/gofiber/storage/sqlite3
-		store = session.New(session.Config{
-			Storage:        storage,
-			Expiration:     180 * 24 * time.Hour, // six months, approximately
-			CookieSameSite: "Lax",                // PRODUCTION: Make sure you understand this before changing!
-			//CookieDomain: "your-web-site-here.whatever", // PRODUCTION: THIS MUST BE SET TO YOUR WEB DOMAIN
-			//CookieHTTPOnly: true,                        // PRODUCTION: THIS MUST BE SET TO true
-			//CookieSecure: true,                          // PRODUCTION: THIS MUST BE SET TO true
-		})
-	}
-}
-
-func getErrorIfAny(sess *WrappedSession) interface{} {
+func getErrorIfAny(sess *wrapped_session.WrappedSession) interface{} {
 	errVal := sess.Get(constants.ErrorKey)
 	if errVal != nil && errVal != "" {
 		sess.Delete(constants.ErrorKey)
@@ -52,7 +35,7 @@ func getErrorIfAny(sess *WrappedSession) interface{} {
 	return errVal
 }
 
-func getMessageIfAny(sess *WrappedSession) interface{} {
+func getMessageIfAny(sess *wrapped_session.WrappedSession) interface{} {
 	msgVal := sess.Get(constants.MessageKey)
 	if msgVal != nil && msgVal != "" {
 		sess.Delete(constants.MessageKey)
@@ -70,7 +53,7 @@ func getSignInUpCode() string {
 	return result
 }
 
-func redirectIfSignedIn(c *fiber.Ctx, sess *WrappedSession) bool {
+func redirectIfSignedIn(c *fiber.Ctx, sess *wrapped_session.WrappedSession) bool {
 	isSignedIn := sess.Get(constants.IsSignedInKey)
 	if isSignedIn == constants.IsSignedInValue {
 		_ = c.Redirect(constants.IndexPath, fiber.StatusSeeOther)
@@ -81,51 +64,11 @@ func redirectIfSignedIn(c *fiber.Ctx, sess *WrappedSession) bool {
 	return false
 }
 
-type WrappedSession struct {
-	dirty         bool
-	actualSession *session.Session
-}
-
-func (ms *WrappedSession) Get(key string) interface{} {
-	return ms.actualSession.Get(key)
-}
-
-func (ms *WrappedSession) Set(key string, value interface{}) {
-	ms.actualSession.Set(key, value)
-	ms.dirty = true
-}
-
-func (ms *WrappedSession) Delete(key string) {
-	ms.actualSession.Delete(key)
-	ms.dirty = true
-}
-
-func withSession(c *fiber.Ctx, wrapt func(c *fiber.Ctx, sess *WrappedSession) error) error {
-	sess, err := store.Get(c)
-	if err != nil {
-		return err
-	}
-
-	mySess := WrappedSession{
-		dirty:         false,
-		actualSession: sess,
-	}
-	err = wrapt(c, &mySess)
-
-	if err == nil && mySess.dirty {
-		if err = sess.Save(); err != nil {
-			log.Printf("========> Error saving Session: %v\n", err)
-		}
-	}
-
-	return err
-}
-
 func SetUpAuthRoutes(app *fiber.App) {
-	setupStorage()
+	wrapped_session.SetupStorage()
 
 	app.Get(constants.AuthSignInPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
+		return wrapped_session.WithSession(c, func(c *fiber.Ctx, sess *wrapped_session.WrappedSession) error {
 			if redirectIfSignedIn(c, sess) {
 				return nil
 			}
@@ -141,7 +84,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	})
 
 	app.Post(constants.AuthSubmitSignInPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
+		return wrapped_session.WithSession(c, func(c *fiber.Ctx, sess *wrapped_session.WrappedSession) error {
 			if redirectIfSignedIn(c, sess) {
 				return nil
 			}
@@ -165,7 +108,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	})
 
 	app.Get(constants.AuthSignUpPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
+		return wrapped_session.WithSession(c, func(c *fiber.Ctx, sess *wrapped_session.WrappedSession) error {
 			if redirectIfSignedIn(c, sess) {
 				return nil
 			}
@@ -181,7 +124,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	})
 
 	app.Post(constants.AuthSubmitSignUpPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
+		return wrapped_session.WithSession(c, func(c *fiber.Ctx, sess *wrapped_session.WrappedSession) error {
 			if redirectIfSignedIn(c, sess) {
 				return nil
 			}
@@ -205,7 +148,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	})
 
 	app.Get(constants.AuthEnterCodePath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
+		return wrapped_session.WithSession(c, func(c *fiber.Ctx, sess *wrapped_session.WrappedSession) error {
 			if redirectIfSignedIn(c, sess) {
 				return nil
 			}
@@ -222,7 +165,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	})
 
 	app.Post(constants.AuthSubmitCodePath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
+		return wrapped_session.WithSession(c, func(c *fiber.Ctx, sess *wrapped_session.WrappedSession) error {
 			if redirectIfSignedIn(c, sess) {
 				return nil
 			}
@@ -309,7 +252,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	})
 
 	app.Post(constants.AuthCancelPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
+		return wrapped_session.WithSession(c, func(c *fiber.Ctx, sess *wrapped_session.WrappedSession) error {
 			if redirectIfSignedIn(c, sess) {
 				return nil
 			}
@@ -324,7 +267,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 	})
 
 	app.Post(constants.AuthSignOutPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
+		return wrapped_session.WithSession(c, func(c *fiber.Ctx, sess *wrapped_session.WrappedSession) error {
 			sess.Delete(constants.IsSignedInKey)
 			sess.Delete(constants.EmailKey)
 			sess.Delete(constants.ExpectedCodeKey)

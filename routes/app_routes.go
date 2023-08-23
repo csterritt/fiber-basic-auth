@@ -2,22 +2,15 @@ package routes
 
 import (
 	"fiber-basic-auth/constants"
+	"fiber-basic-auth/wrapped_session"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/session"
-	"github.com/gofiber/storage/sqlite3"
 )
 
 func SetUpAppRoutes(app *fiber.App) {
-	// set up local sqlite3 storage for session information
-	if storage == nil {
-		storage = sqlite3.New() // From github.com/gofiber/storage/sqlite3
-		store = session.New(session.Config{
-			Storage: storage,
-		})
-	}
+	wrapped_session.SetupStorage()
 
 	app.Get(constants.IndexPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
+		return wrapped_session.WithSession(c, func(c *fiber.Ctx, sess *wrapped_session.WrappedSession) error {
 			isSignedIn := sess.Get(constants.IsSignedInKey) == constants.IsSignedInValue
 
 			// any error
@@ -35,7 +28,7 @@ func SetUpAppRoutes(app *fiber.App) {
 	})
 
 	app.Get(constants.ProtectedPath, func(c *fiber.Ctx) error {
-		return withSession(c, func(c *fiber.Ctx, sess *WrappedSession) error {
+		return wrapped_session.WithSession(c, func(c *fiber.Ctx, sess *wrapped_session.WrappedSession) error {
 			isSignedIn := sess.Get(constants.IsSignedInKey)
 			if isSignedIn != constants.IsSignedInValue {
 				sess.Set(constants.ErrorKey, "You must be signed in to visit that page.")
