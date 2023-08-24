@@ -15,7 +15,13 @@
 </p>
 
 <p>
+    <form method="POST" action="/auth/resubmit-code">
+        <button>Resend the sign in/sign up code</button>
+    </form>
+</p>
+
+<p>
     <form method="POST" action="/auth/cancel-sign-in">
-        <button>Cancel sign in/up</button>
+        <button>Cancel sign in/sign up</button>
     </form>
 </p>

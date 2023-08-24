@@ -7,6 +7,7 @@ const AuthSubmitSignInPath = "/auth/submit-sign-in"
 const AuthSubmitSignUpPath = "/auth/submit-sign-up"
 const AuthEnterCodePath = "/auth/enter-code"
 const AuthSubmitCodePath = "/auth/submit-code"
+const AuthResubmitCodePath = "/auth/resubmit-code"
 const AuthCancelPath = "/auth/cancel-sign-in"
 
 const IndexPath = "/"

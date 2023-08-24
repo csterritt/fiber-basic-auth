@@ -74,7 +74,7 @@ Second, the codes expire in twenty minutes. You can change this duration by
 setting the `CodeExpireTimeInSeconds` value in `constants.constants.go`.
 
 Third, to prevent someone trying *every possible code*, the user will get a failure
-if they enter a wrong code more than three times. You can change the failure  count
+if they enter a wrong code more than three times. You can change the failure count
 by setting the `WrongCodeFailureCount` value in `constants.constants.go`.
 
 Fourth, search the source for the phrase `PRODUCTION:`. You'll find a number of places
@@ -93,6 +93,8 @@ maybe it's just a pop-up/toast/other notification.
 Seventh, allow resubmitting the code (but only after a suitable interval).
 
 Eighth, when the session fails to save, redirect to a 500 error page, notify admins.
+
+Ninth, add dir='auto' to all inputs.
 
 ## License
 

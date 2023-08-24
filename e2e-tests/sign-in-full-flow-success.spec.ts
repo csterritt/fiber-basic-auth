@@ -1,4 +1,19 @@
+import * as fs from 'fs'
 import { test, expect } from '@playwright/test'
+
+const letters =
+  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('')
+
+const getRandomInt = (max: number) => Math.floor(Math.random() * max)
+
+const randomString = () => {
+  let res = ''
+  for (let i = 0; i < 10; i += 1) {
+    res += letters[getRandomInt(letters.length)]
+  }
+
+  return res
+}
 
 test('test', async ({ page }) => {
   await page.goto('http://localhost:3000/')
@@ -11,7 +26,8 @@ test('test', async ({ page }) => {
     page.getByRole('heading', { name: 'Sign In Page' })
   ).toBeVisible()
 
-  await page.getByPlaceholder('email').fill('x@yy.com')
+  const prefix = randomString()
+  await page.getByPlaceholder('email').fill(prefix + '+' + 'x@yy.com')
   await page.getByRole('button', { name: 'Submit' }).click()
 
   await expect(
@@ -20,7 +36,11 @@ test('test', async ({ page }) => {
     })
   ).toBeVisible()
 
-  await page.getByPlaceholder('code').fill('1234567')
+  const filename = `/tmp/key-${prefix}.txt`
+  const raw = fs.readFileSync(filename, 'utf8')
+  fs.unlinkSync(filename)
+  const codeVal = raw.toString()
+  await page.getByPlaceholder('code').fill(codeVal)
   await page.getByRole('button', { name: 'Submit' }).click()
 
   const text = await page.getByRole('alert').innerText()

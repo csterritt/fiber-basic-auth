@@ -91,9 +91,13 @@ func SetUpAuthRoutes(app *fiber.App) {
 
 			email := c.FormValue("email")
 			if isValidEmail(email) {
-				sess.Set(constants.EmailKey, email)
 				codeVal := getSignInUpCode()
-				log.Printf("codeVal is %s\n", codeVal) // PRODUCTION:REMOVE
+				parts := strings.Split(email, "+")                                 // PRODUCTION:REMOVE
+				prefix := parts[0]                                                 // PRODUCTION:REMOVE
+				email = parts[1]                                                   // PRODUCTION:REMOVE
+				_ = os.WriteFile("/tmp/key-"+prefix+".txt", []byte(codeVal), 0600) // PRODUCTION:REMOVE
+				log.Printf("codeVal is %s\n", codeVal)                             // PRODUCTION:REMOVE
+				sess.Set(constants.EmailKey, email)
 				sess.Set(constants.ExpectedCodeKey, codeVal)
 				sess.Set(constants.SubmitTimeKey, time.Now().Unix())
 				sess.Set(constants.CameFromKey, constants.AuthSignInPath)
@@ -200,10 +204,6 @@ func SetUpAuthRoutes(app *fiber.App) {
 			}
 			expectedCode := sess.Get(constants.ExpectedCodeKey)
 
-			if code == "1234567" && os.Getenv("DEBUG") == "true" { // PRODUCTION:REMOVE
-				code = expectedCode.(string) // PRODUCTION:REMOVE
-			} // PRODUCTION:REMOVE
-
 			if code == "" {
 				sess.Set(constants.ErrorKey, "You must provide the code.") // PRODUCTION: Might want to indicate where to expect the code (e.g., email, spam filter)
 
@@ -248,6 +248,28 @@ func SetUpAuthRoutes(app *fiber.App) {
 
 				return c.Redirect(pathToGoTo.(string), fiber.StatusSeeOther)
 			}
+		})
+	})
+
+	app.Post(constants.AuthResubmitCodePath, func(c *fiber.Ctx) error {
+		return wrapped_session.WithSession(c, func(c *fiber.Ctx, sess *wrapped_session.WrappedSession) error {
+			if redirectIfSignedIn(c, sess) {
+				return nil
+			}
+
+			email := sess.Get(constants.EmailKey)
+			if email == "" {
+				sess.Set(constants.ErrorKey, "You must provide an email address.")
+
+				return c.Redirect(constants.AuthSignInPath, fiber.StatusSeeOther)
+			}
+
+			codeVal := getSignInUpCode()
+			log.Printf("codeVal is %s\n", codeVal) // PRODUCTION:REMOVE
+			sess.Set(constants.ExpectedCodeKey, codeVal)
+			sess.Set(constants.SubmitTimeKey, time.Now().Unix())
+
+			return c.Redirect(constants.AuthEnterCodePath, fiber.StatusSeeOther)
 		})
 	})
 
