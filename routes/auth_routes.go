@@ -92,11 +92,13 @@ func SetUpAuthRoutes(app *fiber.App) {
 			email := c.FormValue("email")
 			if isValidEmail(email) {
 				codeVal := getSignInUpCode()
-				parts := strings.Split(email, "+")                                 // PRODUCTION:REMOVE
-				prefix := parts[0]                                                 // PRODUCTION:REMOVE
-				email = parts[1]                                                   // PRODUCTION:REMOVE
-				_ = os.WriteFile("/tmp/key-"+prefix+".txt", []byte(codeVal), 0600) // PRODUCTION:REMOVE
-				log.Printf("codeVal is %s\n", codeVal)                             // PRODUCTION:REMOVE
+				parts := strings.Split(email, "+") // PRODUCTION:REMOVE
+				if len(parts) == 2 {               // PRODUCTION:REMOVE
+					prefix := parts[0]                                                 // PRODUCTION:REMOVE
+					email = parts[1]                                                   // PRODUCTION:REMOVE
+					_ = os.WriteFile("/tmp/key-"+prefix+".txt", []byte(codeVal), 0600) // PRODUCTION:REMOVE
+				} // PRODUCTION:REMOVE
+				log.Printf("codeVal is %s\n", codeVal) // PRODUCTION:REMOVE
 				sess.Set(constants.EmailKey, email)
 				sess.Set(constants.ExpectedCodeKey, codeVal)
 				sess.Set(constants.SubmitTimeKey, time.Now().Unix())
@@ -135,9 +137,15 @@ func SetUpAuthRoutes(app *fiber.App) {
 
 			email := c.FormValue("email")
 			if isValidEmail(email) {
-				sess.Set(constants.EmailKey, email)
 				codeVal := getSignInUpCode()
+				parts := strings.Split(email, "+") // PRODUCTION:REMOVE
+				if len(parts) == 2 {               // PRODUCTION:REMOVE
+					prefix := parts[0]                                                 // PRODUCTION:REMOVE
+					email = parts[1]                                                   // PRODUCTION:REMOVE
+					_ = os.WriteFile("/tmp/key-"+prefix+".txt", []byte(codeVal), 0600) // PRODUCTION:REMOVE
+				} // PRODUCTION:REMOVE
 				log.Printf("codeVal is %s\n", codeVal) // PRODUCTION:REMOVE
+				sess.Set(constants.EmailKey, email)
 				sess.Set(constants.ExpectedCodeKey, codeVal)
 				sess.Set(constants.SubmitTimeKey, time.Now().Unix())
 				sess.Set(constants.CameFromKey, constants.AuthSignUpPath)

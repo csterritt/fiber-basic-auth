@@ -1,34 +1,34 @@
 import { test, expect } from '@playwright/test'
 
+import { getPrefix, getCodeFromFileWithPrefix } from './support/code-access'
+import { findHeading, findTextInRole } from './support/finders'
+
 test('test', async ({ page }) => {
   await page.goto('http://localhost:3000/protected')
-  await expect(
-    page.getByRole('heading', { name: 'Sign In Page' })
-  ).toBeVisible()
+  await findHeading(page, 'Sign In Page')
 
-  let text = await page.getByRole('alert').innerText()
-  expect(
-    text === 'There was a problem: You must be signed in to visit that page.'
-  ).toBeTruthy()
+  await findTextInRole(
+    page,
+    'alert',
+    'There was a problem: You must be signed in to visit that page.'
+  )
 
-  await page.getByPlaceholder('email').fill('x@yy.com')
+  const prefix = getPrefix()
+  await page.getByPlaceholder('email').fill(prefix + '+' + 'x@yy.com')
   await page.getByRole('button', { name: 'Submit' }).click()
 
-  await expect(
-    page.getByRole('heading', {
-      name: 'Enter your magic code here for email address x@yy.com.',
-    })
-  ).toBeVisible()
+  await findHeading(
+    page,
+    'Enter your magic code here for email address x@yy.com.'
+  )
 
-  await page.getByPlaceholder('code').fill('1234567')
+  const codeVal = getCodeFromFileWithPrefix(prefix)
+  await page.getByPlaceholder('code').fill(codeVal)
   await page.getByRole('button', { name: 'Submit' }).click()
 
-  await expect(
-    page.getByRole('heading', { name: 'The protected page!' })
-  ).toBeVisible()
+  await findHeading(page, 'The protected page!')
 
-  text = await page.getByRole('alert').innerText()
-  expect(text === 'You are signed in.').toBeTruthy()
+  await findTextInRole(page, 'alert', 'You are signed in.')
 
   await page.getByRole('button', { name: 'Sign out' }).click()
 

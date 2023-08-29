@@ -1,13 +1,14 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
+
+import { findHeading, findTextInRole } from './support/finders'
 
 test('test', async ({ page }) => {
   await page.goto('http://localhost:3000/protected')
-  await expect(
-    page.getByRole('heading', { name: 'Sign In Page' })
-  ).toBeVisible()
+  await findHeading(page, 'Sign In Page')
 
-  const text = await page.getByRole('alert').innerText()
-  expect(
-    text === 'There was a problem: You must be signed in to visit that page.'
-  ).toBeTruthy()
+  await findTextInRole(
+    page,
+    'alert',
+    'There was a problem: You must be signed in to visit that page.'
+  )
 })

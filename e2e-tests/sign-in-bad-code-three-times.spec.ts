@@ -1,50 +1,49 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
+
+import { findHeading, findTextInRole } from './support/finders'
 
 test('test', async ({ page }) => {
   await page.goto('http://localhost:3000/')
-  await expect(
-    page.getByRole('heading', { name: 'A basic sign-in protected website.' })
-  ).toBeVisible()
+  await findHeading(page, 'A basic sign-in protected website.')
 
   await page.getByRole('link', { name: 'The protected page' }).click()
-  await expect(
-    page.getByRole('heading', { name: 'Sign In Page' })
-  ).toBeVisible()
-  let text = await page.getByRole('alert').innerText()
-  expect(
-    text === 'There was a problem: You must be signed in to visit that page.'
-  ).toBeTruthy()
+  await findHeading(page, 'Sign In Page')
+  await findTextInRole(
+    page,
+    'alert',
+    'There was a problem: You must be signed in to visit that page.'
+  )
 
   await page.getByPlaceholder('email').fill('x@yy.com')
   await page.getByRole('button', { name: 'Submit' }).click()
 
-  await expect(
-    page.getByRole('heading', {
-      name: 'Enter your magic code here for email address x@yy.com.',
-    })
-  ).toBeVisible()
+  await findHeading(
+    page,
+    'Enter your magic code here for email address x@yy.com.'
+  )
 
   for (let i = 0; i < 3; i += 1) {
     await page.getByPlaceholder('code').fill('1234')
     await page.getByRole('button', { name: 'Submit' }).click()
 
-    await expect(
-      page.getByRole('heading', {
-        name: 'Enter your magic code here for email address x@yy.com.',
-      })
-    ).toBeVisible()
-    text = await page.getByRole('alert').innerText()
-    expect(text === 'There was a problem: That code is incorrect.').toBeTruthy()
+    await findHeading(
+      page,
+      'Enter your magic code here for email address x@yy.com.'
+    )
+    await findTextInRole(
+      page,
+      'alert',
+      'There was a problem: That code is incorrect.'
+    )
   }
 
   await page.getByPlaceholder('code').fill('1234')
   await page.getByRole('button', { name: 'Submit' }).click()
 
-  await expect(
-    page.getByRole('heading', { name: 'A basic sign-in protected website.' })
-  ).toBeVisible()
-  text = await page.getByRole('alert').innerText()
-  expect(
-    text === 'There was a problem: The wrong code was given too many times.'
-  ).toBeTruthy()
+  await findHeading(page, 'A basic sign-in protected website.')
+  await findTextInRole(
+    page,
+    'alert',
+    'There was a problem: The wrong code was given too many times.'
+  )
 })

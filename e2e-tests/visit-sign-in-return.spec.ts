@@ -1,20 +1,16 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
+
+import { findHeading } from './support/finders'
 
 test('test', async ({ page }) => {
   await page.goto('http://localhost:3000/')
 
-  await expect(
-    page.getByRole('heading', { name: 'A basic sign-in protected website.' })
-  ).toBeVisible()
+  await findHeading(page, 'A basic sign-in protected website.')
 
   await page.getByRole('link', { name: 'Sign in' }).click()
-  await expect(
-    page.getByRole('heading', { name: 'Sign In Page' })
-  ).toBeVisible()
+  await findHeading(page, 'Sign In Page')
 
   await page.getByRole('link', { name: 'Back to the main page.' }).click()
 
-  await expect(
-    page.getByRole('heading', { name: 'A basic sign-in protected website.' })
-  ).toBeVisible()
+  await findHeading(page, 'A basic sign-in protected website.')
 })
