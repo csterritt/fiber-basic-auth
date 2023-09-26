@@ -203,7 +203,7 @@ func SetUpAuthRoutes(app *fiber.App) {
 				} else {
 					log.Printf("Code expired %v seconds ago.\n", time.Now().Unix()-timeSubmitted.(int64))
 				}
-				cameFrom := sess.Get(constants.CameFromKey).(string)
+				cameFrom := sess.GetWithDefault(constants.CameFromKey, "").(string)
 				sess.Delete(constants.ExpectedCodeKey)
 				sess.Delete(constants.CameFromKey)
 				sess.Set(constants.ErrorKey, "The code has expired, please try again.")

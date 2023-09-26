@@ -35,6 +35,15 @@ func (ms *WrappedSession) Get(key string) interface{} {
 	return ms.actualSession.Get(key)
 }
 
+func (ms *WrappedSession) GetWithDefault(key string, defaultVal interface{}) interface{} {
+	val := ms.actualSession.Get(key)
+	if val == nil {
+		val = defaultVal
+	}
+
+	return val
+}
+
 func (ms *WrappedSession) Set(key string, value interface{}) {
 	ms.actualSession.Set(key, value)
 	ms.dirty = true
